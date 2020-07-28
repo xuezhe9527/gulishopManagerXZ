@@ -140,7 +140,9 @@ export default {
       }
       console.log(isJPGOrPNG,isLt500K)
       // return (isJPGOrPNG && isLt500K)
-      this.isCanAdd = false //这里只是暂时的解决方案
+      if(!(isJPGOrPNG && isLt500K)){
+        this.isCanAdd = false //这里只是暂时的解决方案
+      }
     },
     //添加或修改trade
     async addOrUpdateTrademark() {
@@ -172,7 +174,7 @@ export default {
           const result =await  this.$API.trademark.delete(trademark.id)
           if(result.code===200){
             this.$message.success("删除品牌成功")
-            this.getTrademarkList(1)
+            this.getTrademarkList(this.trademarkList.length>1? this.page:this.page -1)
           }else{
             this.$message.error("删除品牌失败")
           }
