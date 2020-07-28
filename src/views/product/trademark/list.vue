@@ -140,7 +140,7 @@ export default {
       }
       console.log(isJPGOrPNG,isLt500K)
       // return (isJPGOrPNG && isLt500K)
-      this.isCanAdd = false
+      this.isCanAdd = false //这里只是暂时的解决方案
     },
     //添加或修改trade
     async addOrUpdateTrademark() {
