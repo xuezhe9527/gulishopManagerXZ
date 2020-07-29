@@ -41,11 +41,11 @@
 
     <!-- Form -->
     <el-dialog title="添加" :visible.sync="isShowDialog">
-      <el-form :model="form">
-        <el-form-item label="品牌名称" :label-width="formLabelWidth">
+      <el-form :model="form" :rules="rules" ref="form">
+        <el-form-item label="品牌名称" :label-width="formLabelWidth" prop="tmName">
           <el-input v-model="form.tmName" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="品牌LOGO" :label-width="formLabelWidth">
+        <el-form-item label="品牌LOGO" :label-width="formLabelWidth" prop="logoUrl">
           <!-- 图片上传upload组件  action需要访问实际的服务器地址（跨域问题）-->
           <el-upload
             class="avatar-uploader"
@@ -73,7 +73,7 @@ export default {
   name: "Trademark",
   data() {
     return {
-      isCanAdd:true,
+      // isCanAdd: true,
       page: 1,
       limit: 3,
       total: 0,
@@ -84,12 +84,31 @@ export default {
         tmName: "",
         logoUrl: "",
       },
+      rules: {
+        tmName: [
+          { required: true, message: "请输入品牌名称", trigger: "blur" },
+          // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
+          // 使用自定义的验证规则
+          { validator: this.validateTmName, trigger: "change" },
+        ],
+        logoUrl: [
+          { required: true, message: "请上传合适的照片", trigger: "change" },
+        ],
+      },
     };
   },
   mounted() {
     this.getTrademarkList();
   },
   methods: {
+    //自定义的验证规则
+    validateTmName(rule, value, callback) {
+      if (value.length < 2 || value.length > 5) {
+        callback(new Error("品牌的名称要在2-5之间"));
+      } else {
+        callback();
+      }
+    },
     //查詢列表
     async getTrademarkList(page = 1) {
       this.page = page;
@@ -132,35 +151,41 @@ export default {
 
       if (!isJPGOrPNG) {
         this.$message.error("上传图片只能是 JPG或PNG 格式!");
-        
       }
       if (!isLt500K) {
         this.$message.error("上传图片大小不能超过 500K!");
-        
       }
-      console.log(isJPGOrPNG,isLt500K)
+      console.log(isJPGOrPNG, isLt500K);
       // return (isJPGOrPNG && isLt500K)
-      if(!(isJPGOrPNG && isLt500K)){
-        this.isCanAdd = false //这里只是暂时的解决方案
+      if (!(isJPGOrPNG && isLt500K)) {
+        // this.isCanAdd = false; //这里只是暂时的解决方案
       }
     },
     //添加或修改trade
-    async addOrUpdateTrademark() {
-      if(!this.isCanAdd){
-        return
-      }
-      let trademark = this.form;
-      const result = await this.$API.trademark.addOrUpdate(trademark);
-      //成功之后的操作 提示用户，重新请求，关闭对话框
-      if (result.code === 200) {
-        // this.$message.success("添加品牌成功");
-        this.$message.success(`${trademark.id ? "修改" : "添加"}品牌成功`);
-        this.getTrademarkList(trademark.id ? this.page : 1);
-        this.isShowDialog = false;
-      } else {
-        this.$message.error(`${trademark.id ? "修改" : "添加"}品牌失败`);
-        this.isShowDialog = false;
-      }
+    addOrUpdateTrademark() {
+      // if (!this.isCanAdd) {
+      //   return;
+      // }
+
+      this.$refs.form.validate(async (valid) => {
+        if (valid) {
+          let trademark = this.form;
+          const result = await this.$API.trademark.addOrUpdate(trademark);
+          //成功之后的操作 提示用户，重新请求，关闭对话框
+          if (result.code === 200) {
+            // this.$message.success("添加品牌成功");
+            this.$message.success(`${trademark.id ? "修改" : "添加"}品牌成功`);
+            this.getTrademarkList(trademark.id ? this.page : 1);
+            this.isShowDialog = false;
+          } else {
+            this.$message.error(`${trademark.id ? "修改" : "添加"}品牌失败`);
+            this.isShowDialog = false;
+          }
+        } else {
+          console.log("验证失败");
+          return false;
+        }
+      });
     },
 
     //删除一个trademark
@@ -171,14 +196,15 @@ export default {
         type: "warning",
       })
         .then(async () => {
-          const result =await  this.$API.trademark.delete(trademark.id)
-          if(result.code===200){
-            this.$message.success("删除品牌成功")
-            this.getTrademarkList(this.trademarkList.length>1? this.page:this.page -1)
-          }else{
-            this.$message.error("删除品牌失败")
+          const result = await this.$API.trademark.delete(trademark.id);
+          if (result.code === 200) {
+            this.$message.success("删除品牌成功");
+            this.getTrademarkList(
+              this.trademarkList.length > 1 ? this.page : this.page - 1
+            );
+          } else {
+            this.$message.error("删除品牌失败");
           }
-          
         })
         .catch(() => {
           this.$message({
