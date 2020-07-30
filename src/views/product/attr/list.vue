@@ -105,6 +105,15 @@ export default {
 
     //打开添加页面
     showAddDiv() {
+      //清空上次的记录
+      this.attrForm= {
+        attrName: "",
+        attrValueList: [],
+        categoryId: this.category3Id,
+        categoryLevel: 3,
+      },
+
+      //关闭展示页，打开添加页面
       this.isShowList = false;
     },
     //接受子组件的值
