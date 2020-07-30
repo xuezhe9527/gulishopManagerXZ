@@ -28,7 +28,7 @@
           <el-table-column label="操作" width="width">
             <template slot-scope="{row,$index}">
               <HintButton type="warning" icon="el-icon-edit" title="修改" size="mini"></HintButton>
-              <HintButton type="danger" icon="el-icon-delete" title="删除" size="mini"></HintButton>
+              <HintButton type="danger" icon="el-icon-delete" title="删除" size="mini" @click="delOriginOne(row,$index)"></HintButton>
             </template>
           </el-table-column>
         </el-table>
@@ -39,26 +39,32 @@
             <el-input v-model="attrForm.attrName" placeholder="请输入属性名称"></el-input>
           </el-form-item>
         </el-form>
-        <el-button type="primary" icon="el-icon-plus" @click="addAttrValue" :disabled="!attrForm.attrName">添加属性值</el-button>
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          @click="addAttrValue"
+          :disabled="!attrForm.attrName"
+        >添加属性值</el-button>
         <el-button @click="isShowList = true">取消</el-button>
         <el-table :data="attrForm.attrValueList" border style="width: 100%;margin-top:20px">
-          <el-table-column  label="序号" width="80" align="center" type="index"></el-table-column>
+          <el-table-column label="序号" width="80" align="center" type="index"></el-table-column>
           <el-table-column prop="name" label="属性值名称" width="380">
-              <template slot-scope="{row,$index}">
-                 <el-input v-model="row.valueName" placeholder="请输入属性值的名称" size="mini"></el-input>
-              </template>
+            <template slot-scope="{row,$index}">
+              <el-input v-model="row.valueName" placeholder="请输入属性值的名称" size="mini"></el-input>
+            </template>
           </el-table-column>
-          <el-table-column  label="操作">
-             <template>
-              <HintButton icon="el-icon-delete" type="danger" size="mini" title="删除"></HintButton>
+          <el-table-column label="操作">
+            <template slot-scope="{row,$index}">
+              <HintButton icon="el-icon-delete" type="danger" size="mini" title="删除" @click="deleteOneAttr(row,$index)"></HintButton>
             </template>
           </el-table-column>
         </el-table>
 
-        <el-button type="primary" >保存</el-button>
+        <el-button type="primary" :disabled="!attrForm.attrValueList[0]" @click="saveAttr" >保存</el-button>
         <el-button @click="isShowList = true">取消</el-button>
       </div>
     </el-card>
+
   </div>
 </template>
 
@@ -75,6 +81,7 @@ export default {
       //默认展示列表页
       isShowList: true,
 
+      //保存按钮根据数组的长度是否>0来决定是否可以点击
       // attrForm: {
       //   attrName: "",
       //   attrValueList: [],
@@ -95,26 +102,62 @@ export default {
     // this.getAttrLIst();
   },
   methods: {
+    //删除列表中原来已经存在的一条属性数据
+    async delOriginOne(row,$index){
+      console.log(row);
+      console.log($index);
+      const result = await this.$API.attr.delete(row.id)
+      if(result.code ===200){
+        this.$message.success("删除成功")
+        this.getAttrLIst()
+      }else{
+        this.$message.error("删除失败")
+      }
+    },
+    //每行待添加的属性可以删除
+    deleteOneAttr(row,$index){
+      // console.log(row);
+      // console.log($index);
+      this.attrForm.attrValueList.splice($index,1)
+    },
+    //点击保存，准备发请求添加
+    async saveAttr() {
+      //打印下，检查是否attrForm已经有需要的数据
+      console.log(this.attrForm);
+      // 不需要这个逻辑，因为长度小于0，按钮将不可用
+      // if(this.attrForm.attrValueList.length<0){
+      //   alert("您至少需要添加一条数据")
+      // }
+      const result = await this.$API.attr.addOrUpdate(this.attrForm)
+      if(result.code ===200){
+        // alert("恭喜您添加成功")
+        this.$message.success("恭喜您添加成功")
+        this.getAttrLIst()
+        this.isShowList = true
+      }else{
+        this.$message.error("很抱歉您添加失败了，请尝试重新添加")
+        this.isShowList = true
+      }
+    },
     //添加一条空的数据，弹出input输入框
-    addAttrValue(){
+    addAttrValue() {
       this.attrForm.attrValueList.push({
-        attrId:this.attrForm.id,
-        valueName:''
-      })
+        attrId: this.attrForm.id,
+        valueName: "",
+      });
     },
 
     //打开添加页面
     showAddDiv() {
       //清空上次的记录
-      this.attrForm= {
+      (this.attrForm = {
         attrName: "",
         attrValueList: [],
         categoryId: this.category3Id,
         categoryLevel: 3,
-      },
-
-      //关闭展示页，打开添加页面
-      this.isShowList = false;
+      }),
+        //关闭展示页，打开添加页面
+        this.isShowList = false;
     },
     //接受子组件的值
     handlerCategory({ categoryId, level }) {
