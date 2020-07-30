@@ -27,7 +27,7 @@
           </el-table-column>
           <el-table-column label="操作" width="width">
             <template slot-scope="{row,$index}">
-              <HintButton type="warning" icon="el-icon-edit" title="修改" size="mini"></HintButton>
+              <HintButton type="warning" icon="el-icon-edit" title="修改" size="mini" @click="showUpdateDiv(row,$index)"></HintButton>
               <HintButton
                 type="danger"
                 icon="el-icon-delete"
@@ -113,6 +113,19 @@ export default {
     // this.getAttrLIst();
   },
   methods: {
+    //打开修改div，将列表中原来已经存在的一条属性数据展示在 添加和修改一体的div里里面
+    showUpdateDiv(row,$index){
+      // console.log(row);
+      // attrName: "我带你们打"
+      // attrValueList: Array(1)
+      // categoryId: 61
+      // categoryLevel: 3
+      // id: 1037
+      this.attrForm = row
+      this.isShowList = false
+    },
+    // 修改列表中原来已经存在的一条属性数据
+
     //删除列表中原来已经存在的一条属性数据
      delOriginOne(row,$index){
       console.log(row);
@@ -151,7 +164,7 @@ export default {
       // console.log($index);
       this.attrForm.attrValueList.splice($index,1)
     },
-    //点击保存，准备发请求添加
+    //点击保存，准备发请求添加/修改
     async saveAttr() {
       //打印下，检查是否attrForm已经有需要的数据
       console.log(this.attrForm);
@@ -162,7 +175,7 @@ export default {
       const result = await this.$API.attr.addOrUpdate(this.attrForm)
       if(result.code ===200){
         // alert("恭喜您添加成功")
-        this.$message.success("恭喜您添加成功")
+        this.$message.success(`恭喜您${this.attrForm.id?'修改':'添加'}成功`)
         this.getAttrLIst()
         this.isShowList = true
       }else{
