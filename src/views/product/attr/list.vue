@@ -28,7 +28,13 @@
           <el-table-column label="操作" width="width">
             <template slot-scope="{row,$index}">
               <HintButton type="warning" icon="el-icon-edit" title="修改" size="mini"></HintButton>
-              <HintButton type="danger" icon="el-icon-delete" title="删除" size="mini" @click="delOriginOne(row,$index)"></HintButton>
+              <HintButton
+                type="danger"
+                icon="el-icon-delete"
+                title="删除"
+                size="mini"
+                @click="delOriginOne(row,$index)"
+              ></HintButton>
             </template>
           </el-table-column>
         </el-table>
@@ -55,16 +61,21 @@
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="{row,$index}">
-              <HintButton icon="el-icon-delete" type="danger" size="mini" title="删除" @click="deleteOneAttr(row,$index)"></HintButton>
+              <HintButton
+                icon="el-icon-delete"
+                type="danger"
+                size="mini"
+                title="删除"
+                @click="deleteOneAttr(row,$index)"
+              ></HintButton>
             </template>
           </el-table-column>
         </el-table>
 
-        <el-button type="primary" :disabled="!attrForm.attrValueList[0]" @click="saveAttr" >保存</el-button>
+        <el-button type="primary" :disabled="!attrForm.attrValueList[0]" @click="saveAttr">保存</el-button>
         <el-button @click="isShowList = true">取消</el-button>
       </div>
     </el-card>
-
   </div>
 </template>
 
@@ -103,16 +114,36 @@ export default {
   },
   methods: {
     //删除列表中原来已经存在的一条属性数据
-    async delOriginOne(row,$index){
+     delOriginOne(row,$index){
       console.log(row);
       console.log($index);
-      const result = await this.$API.attr.delete(row.id)
-      if(result.code ===200){
-        this.$message.success("删除成功")
-        this.getAttrLIst()
-      }else{
-        this.$message.error("删除失败")
-      }
+      //不带弹框，直接删除
+      // const result = await this.$API.attr.delete(row.id)
+      // if(result.code ===200){
+      //   this.$message.success("删除成功")
+      //   this.getAttrLIst()
+      // }else{
+      //   this.$message.error("删除失败")
+      // }
+      //带弹框删除(未测试)
+      this.$confirm(`您确定要删除${row.attrName}这个商品属性吗?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+                const result = await this.$API.attr.delete(row.id)
+                if(result.code ===200){
+                  this.$message.success("删除成功")
+                  this.getAttrLIst()
+                }else{
+                  this.$message.error("删除失败")
+                }
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
     },
     //每行待添加的属性可以删除
     deleteOneAttr(row,$index){
