@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <CategorySelector @handlerCategory="handlerCategory"></CategorySelector>
+      <CategorySelector @handlerCategory="handlerCategory" :isShowList="isShowList"></CategorySelector>
     </el-card>
     <el-card>
       <div v-show="isShowList">
@@ -93,6 +93,7 @@ export default {
   },
   mounted() {
     // this.getAttrLIst();
+    // console.log(this.$parent.isShowList)
   },
   methods: {
     //添加一条空的数据，弹出input输入框

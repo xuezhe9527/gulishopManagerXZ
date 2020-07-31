@@ -1,7 +1,7 @@
 <template>
-  <el-form :inline="true" :model="cForm" class="demo-form-inline">
+  <el-form :inline="true" :model="cForm" class="demo-form-inline" :disabled="!isShowList">
     <el-form-item label="一级分类">
-      <el-select v-model="cForm.category1Id" placeholder="选择一级分类" @change="handlerC1">
+      <el-select v-model="cForm.category1Id" placeholder="选择一级分类" @change="handlerC1" >
         <el-option
           :label="c1.name"
           :value="c1.id"
@@ -36,6 +36,10 @@
 <script>
 export default {
   name: "CategorySelector",
+  props:['isShowList'],
+  mounted(){
+    console.log(this.$parent.isShowList)
+  },
   data() {
     return {
       cForm: {
