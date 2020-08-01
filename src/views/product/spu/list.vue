@@ -82,6 +82,7 @@ export default {
     };
   },
   methods: {
+    //展示添加sku的组件
     showAddSkuForm() {
       this.isShowSkuForm = true;
     },
