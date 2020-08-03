@@ -41,5 +41,13 @@ export default {
       url: `${api_name}/baseTrademark/remove/${id}`,
       method: 'delete',
     })
+  },
+
+  // GET /admin/product/baseTrademark/getTrademarkList  请求获取所有的品牌列表
+  getAll(){
+    return request({
+      url:'/admin/product/baseTrademark/getTrademarkList',
+      method:'get'
+    })
   }
 }

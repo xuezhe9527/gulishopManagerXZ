@@ -29,7 +29,7 @@
                 icon="el-icon-edit"
                 title="修改spu"
                 size="mini"
-                @click="showUpdateSpuForm"
+                @click="showUpdateSpuForm(row.id)"
               ></HintButton>
               <HintButton type="info" icon="el-icon-info" title="查看所有的sku" size="mini"></HintButton>
               <!-- <el-popconfirm :title="`您确定要删除${row.attrName}这个属性吗?`" @onConfirm="deleteAttr(row)"> -->
@@ -55,7 +55,7 @@
           @current-change="getSpuList"
         ></el-pagination>
       </div>
-      <SpuForm v-show="isShowSpuForm"></SpuForm>
+      <SpuForm v-show="isShowSpuForm" :visable.sync="isShowSpuForm" ref="spu"></SpuForm>
       <SkuForm v-show="isShowSkuForm"></SkuForm>
     </el-card>
   </div>
@@ -88,9 +88,12 @@ export default {
     },
     showAddSpuForm() {
       this.isShowSpuForm = true;
+      this.$refs.spu.initAddSpuForm(this.category3Id)
     },
-    showUpdateSpuForm() {
+    showUpdateSpuForm(spuId) {
       this.isShowSpuForm = true;
+      // 点击修改页面，需要初始化查詢数据，这个方法在子组件当中
+      this.$refs.spu.initUpdateSpuForm(spuId,this.category3Id)
     },
     //接受子组件的值
     handlerCategory({ categoryId, level }) {
