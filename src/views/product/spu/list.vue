@@ -39,6 +39,7 @@
                 title="删除spu"
                 size="mini"
                 slot="reference"
+                @click="deleteOneSpuById(row)"
               ></HintButton>
               <!-- </el-popconfirm> -->
             </template>
@@ -55,7 +56,13 @@
           @current-change="getSpuList"
         ></el-pagination>
       </div>
-      <SpuForm v-show="isShowSpuForm" :visable.sync="isShowSpuForm" ref="spu"></SpuForm>
+      <SpuForm
+        v-show="isShowSpuForm"
+        :visable.sync="isShowSpuForm"
+        ref="spu"
+        @saveSuccess="saveSuccess"
+        @cancel="cancel"
+      ></SpuForm>
       <SkuForm v-show="isShowSkuForm"></SkuForm>
     </el-card>
   </div>
@@ -82,18 +89,50 @@ export default {
     };
   },
   methods: {
+    async deleteOneSpuById(row) {
+      console.log(row.id);
+      const result = await this.$API.spu.remove(row.id);
+      if (result.code === 200) {
+        this.$message.success("删除成功");
+      } else {
+        this.$message.error("删除失败");
+      }
+      this.getSpuList(this.spuList.length > 1 ? this.page : this.page - 1);
+     
+    },
+    // 子组件点击取消后的调用父组件的方法
+    cancel() {
+      this.$refs.spu.resetData();
+      //重置标识
+      this.spuId = null;
+    },
+
+    //保存成功之后子组件来触发的回调，用来判断是添加成功还是修改成功
+    saveSuccess() {
+      if (this.spuId) {
+        //说明添加成功
+        this.getSpuList(this.page);
+      } else {
+        this.getSpuList();
+      }
+      //清空spuFOrm数据
+      this.$refs.spu.resetData();
+      // 重置标识位
+      this.spuId = null;
+    },
     //展示添加sku的组件
     showAddSkuForm() {
       this.isShowSkuForm = true;
     },
     showAddSpuForm() {
       this.isShowSpuForm = true;
-      this.$refs.spu.initAddSpuForm(this.category3Id)
+      this.$refs.spu.initAddSpuForm(this.category3Id);
     },
     showUpdateSpuForm(spuId) {
+      this.spuId = spuId; //没什么用，只是用来判断是添加还是修改成功
       this.isShowSpuForm = true;
       // 点击修改页面，需要初始化查詢数据，这个方法在子组件当中
-      this.$refs.spu.initUpdateSpuForm(spuId,this.category3Id)
+      this.$refs.spu.initUpdateSpuForm(spuId, this.category3Id);
     },
     //接受子组件的值
     handlerCategory({ categoryId, level }) {
