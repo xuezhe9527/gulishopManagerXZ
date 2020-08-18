@@ -1,6 +1,8 @@
 /* 
 包含所有sku管理的接口请求函数
 */
+
+//day05开始了
 import request from '@/utils/request'
 
 export default {
